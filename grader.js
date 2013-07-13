@@ -31,12 +31,6 @@ var cheerioHtmlFile = function (htmlFile) {
 };
 
 
-var cheerioUrl = function (url) {
-    return rest.get (url).on ('complete', function (result) {
-	return cheerio.load (result);
-    });	
-};
-
 
 var loadChecks = function (checksFile) {
     return JSON.parse (fs.readFileSync (checksFile));
@@ -59,21 +53,27 @@ var checkHtmlFile = function (htmlFile, checksFile) {
 
 
 var checkUrl = function (url, checksFile) {
-    $ = cheerioUrl (url);
-    var checks = loadChecks (checksFile).sort();
+    rest.get (url).on ('complete', function (result) {
+	$ = cheerio.load (result);
+	var checks = loadChecks (checksFile).sort();
 
-    var out = {};
-    for (var ii in checks) {
-	var present = $(checks[ii]).length > 0;
-	out [ checks[ii] ] = present;
-    }
+	var out = {};
+	for (var ii in checks) {
+	    var present = $(checks[ii]).length > 0;
+	    out [ checks[ii] ] = present;
+	}
+
+	var outJson = JSON.stringify (out, null, 4);
+	console.log (outJson);
+    });
+
 }
 
 
 var clone = function (fn) {
     // Workaround for commander.js issue
     // http://stackoverflow.com/a/6772648
-    return fn.bind ( { } );
+    return fn.bind ( {} );
 };
 
 
@@ -99,9 +99,8 @@ if (require.main == module) {
 	console.log (outJson);
     }
     else {
-	var checkJson = checkUrl (program.url, program.checks);
-	var outJson = JSON.stringify (checkJson, null, 4);
-	console.log (outJson);
+	checkUrl (program.url, program.checks);
+
     }
 
 }
