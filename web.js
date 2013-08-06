@@ -10,6 +10,13 @@ app.get('/', function(request, response) {
   response.send(content);
 });
 
+app.get ('world_map.png', function (request, response) {
+    var buffer = fs.readFileSync ('world_map.png');
+    var content = buffer.toString();
+    response.send (content);
+}); 
+
+
 var port = process.env.PORT || 8080;
 app.listen(port, function() {
   console.log("Listening on " + port);
